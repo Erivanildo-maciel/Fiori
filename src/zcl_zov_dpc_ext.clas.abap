@@ -79,9 +79,17 @@ CLASS ZCL_ZOV_DPC_EXT IMPLEMENTATION.
   endmethod.
 
 
-  method OVCABSET_GET_ENTITY.
+  METHOD ovcabset_get_entity.
+    er_entity-ordemid = 1.
+    er_entity-criadopor = 'Nildo Maciel'.
 
-  endmethod.
+    DATA: lv_data TYPE sy-datum,
+          lv_hora TYPE sy-uzeit.
+    lv_hora = sy-uzeit.
+    lv_data = sy-datum.
+
+    er_entity-datacriacao = |{ lv_data }{ lv_hora }|.
+  ENDMETHOD.
 
 
   method OVCABSET_GET_ENTITYSET.
