@@ -183,13 +183,39 @@ CLASS ZCL_ZOV_DPC_EXT IMPLEMENTATION.
 
 
   METHOD ovcabset_get_entityset.
+
     DATA: lt_cab TYPE TABLE OF zovcab.
     DATA: ls_cab TYPE zovcab.
     DATA: ls_entityset LIKE LINE OF et_entityset.
 
+    DATA: lt_orderby TYPE STANDARD TABLE OF string.
+    DATA: lv_orderby TYPE string.
+
+    LOOP AT it_order INTO DATA(ls_order).
+      TRANSLATE ls_order-property TO UPPER CASE.
+      TRANSLATE ls_order-order TO UPPER CASE.
+
+      IF ls_order-order = 'DESC'.
+        ls_order-order = 'DESCENDING'.
+      ELSE.
+        ls_order-order = 'ASCENDING'.
+      ENDIF.
+
+      APPEND |{ ls_order-property } { ls_order-order }| TO   lt_orderby.
+
+    ENDLOOP.
+
+    CONCATENATE LINES OF lt_orderby INTO lv_orderby SEPARATED BY space.
+
     SELECT *
       FROM zovcab
-      INTO TABLE lt_cab.
+     WHERE (iv_filter_string)
+     ORDER BY (lv_orderby)
+      INTO TABLE @lt_cab
+        UP TO @is_paging-top ROWS
+    OFFSET @is_paging-skip.
+
+
 
     LOOP AT lt_cab INTO ls_cab.
       CLEAR ls_entityset.
@@ -200,7 +226,6 @@ CLASS ZCL_ZOV_DPC_EXT IMPLEMENTATION.
       ls_entityset-totalitens  = ls_cab-total_itens.
       ls_entityset-totalfrete  = ls_cab-total_frete.
       ls_entityset-totalordem  = ls_cab-total_ordem.
-
 
       CONVERT
          DATE ls_cab-data_criacao
